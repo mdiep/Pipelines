@@ -1,14 +1,24 @@
 import Foundation
 
+struct Input {
+	var arguments: [String]
+}
+
+struct Output {
+	var exitCode: Int
+	var stderr: Data
+	var stdout: Data
+}
+
 struct Command<Input, Output> {
 	let executable: String
-	let serialize: (Input) -> [String]
-	let deserialize: (Data) -> Output
+	let serialize: (Input) -> Pipelines.Input
+	let deserialize: (Pipelines.Output) -> Output
 
 	init(
 		executable: String,
-		serialize: @escaping (Input) -> ([String]),
-		deserialize: @escaping (Data) -> Output
+		serialize: @escaping (Input) -> Pipelines.Input,
+		deserialize: @escaping (Pipelines.Output) -> Output
 	) {
 		self.executable = executable
 		self.serialize = serialize
@@ -16,7 +26,7 @@ struct Command<Input, Output> {
 	}
 }
 
-extension Command where Input == [String], Output == Data {
+extension Command where Input == Pipelines.Input, Output == Pipelines.Output {
 	init(executable: String) {
 		self.init(executable: executable, serialize: { $0 }, deserialize: { $0 })
 	}
@@ -45,17 +55,3 @@ extension Command {
 		return mapInput { (_: ()) in value }
 	}
 }
-
-extension Command {
-	init(
-		executable: String,
-		serialize: @escaping (Input) -> [String],
-		deserialize: @escaping (String) -> Output
-	) {
-		self = Command<[String], Data>(executable: executable)
-			.mapInput(serialize)
-			.mapOutput { String(data: $0, encoding: .utf8)! }
-			.mapOutput(deserialize)
-	}
-}
-
