@@ -26,12 +26,6 @@ struct Command<Input, Output> {
 	}
 }
 
-extension Command where Input == Pipelines.Input, Output == Pipelines.Output {
-	init(executable: String) {
-		self.init(executable: executable, serialize: { $0 }, deserialize: { $0 })
-	}
-}
-
 extension Command {
 	func mapInput<Value>(_ transform: @escaping (Value) -> Input) -> Command<Value, Output> {
 		return Command<Value, Output>(
@@ -47,11 +41,5 @@ extension Command {
 			serialize: serialize,
 			deserialize: { [deserialize = self.deserialize] in transform(deserialize($0)) }
 		)
-	}
-}
-
-extension Command {
-	func apply(_ value: Input) -> Command<(), Output> {
-		return mapInput { (_: ()) in value }
 	}
 }
