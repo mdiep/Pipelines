@@ -3,7 +3,7 @@ import Foundation
 struct Pipeline<Input, Output> {
 	let block: (Input) throws -> Output
 
-	private init(_ block: @escaping (Input) throws -> Output) {
+	internal init(_ block: @escaping (Input) throws -> Output) {
 		self.block = block
 	}
 

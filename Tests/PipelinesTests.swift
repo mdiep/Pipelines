@@ -16,7 +16,7 @@ class PipelinesTests: XCTestCase {
 		)
 
 		let url = Bundle(identifier: "com.diephouse.matt.Pipelines")!.bundleURL
-		let pipeline = Pipeline(ls)
+		let pipeline = ls
 			.andThen { url.appendingPathComponent($0[1]).path }
 			.andThen(ls)
 		

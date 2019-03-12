@@ -68,3 +68,17 @@ extension Command {
 		return deserialize(output)
 	}
 }
+
+extension Command {
+	func andThen<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
+		return Pipeline<Input, NewOutput> { input in
+			return try transform(self.run(input))
+		}
+	}
+
+	func andThen<NewOutput>(_ command: Command<Output, NewOutput>) -> Pipeline<Input, NewOutput> {
+		return Pipeline<Input, NewOutput> { input in
+			return try command.run(self.run(input))
+		}
+	}
+}
