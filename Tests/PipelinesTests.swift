@@ -3,10 +3,10 @@ import XCTest
 
 class PipelinesTests: XCTestCase {
 	func test() throws {
-		let ls = Command<String?, [String]>(
+		let ls = Command<String, [String]>(
 			executable: "ls",
 			serialize: { directory in
-				return Input(arguments: directory.map { [$0] } ?? [])
+				return Input(arguments: [directory])
 			},
 			deserialize: { output in
 				return String(data: output.stdout, encoding: .utf8)!
@@ -15,12 +15,12 @@ class PipelinesTests: XCTestCase {
 			}
 		)
 
-		let path = Bundle(identifier: "com.diephouse.matt.Pipelines")!
-			.bundleURL
-			.path
+		let url = Bundle(identifier: "com.diephouse.matt.Pipelines")!.bundleURL
 		let pipeline = Pipeline(ls)
-			.andThen { $0.first! }
-		let files = try pipeline.andThen { [$0] }.run(path)
+			.andThen { url.appendingPathComponent($0[1]).path }
+			.andThen(ls)
+		
+		let files = try pipeline.run(url.path)
 		print("\(files.count) files:")
 		for f in files {
 			print("\t • \(f)")

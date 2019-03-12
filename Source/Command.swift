@@ -46,6 +46,25 @@ extension Command {
 
 extension Command {
 	func run(_ input: Input) throws -> Output {
-		return try Pipeline(self).run(input)
+		let input = serialize(input)
+
+		let p = Process()
+		p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+		p.arguments = [executable] + input.arguments
+
+		let stdout = Pipe()
+		let stderr = Pipe()
+		p.standardOutput = stdout
+		p.standardError = stderr
+
+		try p.run()
+		p.waitUntilExit()
+
+		let output = Pipelines.Output(
+			exitCode: Int(p.terminationStatus),
+			stderr: stderr.fileHandleForReading.readDataToEndOfFile(),
+			stdout: stdout.fileHandleForReading.readDataToEndOfFile()
+		)
+		return deserialize(output)
 	}
 }
