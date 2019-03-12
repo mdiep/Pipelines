@@ -43,3 +43,9 @@ extension Command {
 		)
 	}
 }
+
+extension Command {
+	func run(_ input: Input) throws -> Output {
+		return try Pipeline(self).run(input)
+	}
+}
