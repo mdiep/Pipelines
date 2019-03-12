@@ -11,6 +11,8 @@
 		BECE5E5B2237CB7600A82B0D /* PipelinesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECE5E5A2237CB7600A82B0D /* PipelinesTests.swift */; };
 		BECE5E672237CCEB00A82B0D /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECE5E662237CCEB00A82B0D /* Command.swift */; };
 		BECE5E692237CD1200A82B0D /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECE5E682237CD1200A82B0D /* Pipeline.swift */; };
+		BED9C2D8223877F4002E401B /* ReactiveSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BED9C2D7223877F4002E401B /* ReactiveSwift.framework */; };
+		BED9C2DA223877F4002E401B /* Result.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BED9C2D9223877F4002E401B /* Result.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +33,8 @@
 		BECE5E5C2237CB7600A82B0D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BECE5E662237CCEB00A82B0D /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		BECE5E682237CD1200A82B0D /* Pipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pipeline.swift; sourceTree = "<group>"; };
+		BED9C2D7223877F4002E401B /* ReactiveSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ReactiveSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BED9C2D9223877F4002E401B /* Result.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Result.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +42,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BED9C2D8223877F4002E401B /* ReactiveSwift.framework in Frameworks */,
+				BED9C2DA223877F4002E401B /* Result.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,6 +64,7 @@
 				BECE5E4E2237CB7600A82B0D /* Source */,
 				BECE5E592237CB7600A82B0D /* Tests */,
 				BECE5E4D2237CB7600A82B0D /* Products */,
+				BED9C2D6223877F4002E401B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -87,6 +94,15 @@
 				BECE5E5A2237CB7600A82B0D /* PipelinesTests.swift */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		BED9C2D6223877F4002E401B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BED9C2D7223877F4002E401B /* ReactiveSwift.framework */,
+				BED9C2D9223877F4002E401B /* Result.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
