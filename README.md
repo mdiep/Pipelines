@@ -23,4 +23,8 @@ Notably, this is not done with a `(Output) -> Command<Output, NewOutput>` functi
 - [ ] Add the ability to interpret commands differently
 - [ ] Add branching (based on selective applicative functors)
 - [ ] Make more of `Command` static with `KeyPath`s
+- [ ] Parallel commands
+- [ ] Document
+- [ ] Test
+- [ ] Make API public
 
