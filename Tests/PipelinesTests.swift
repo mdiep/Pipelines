@@ -19,6 +19,8 @@ class PipelinesTests: XCTestCase {
 		let pipeline = ls
 			.andThen { url.appendingPathComponent($0[1]).path }
 			.andThen(ls)
+
+        print(pipeline)
 		
 		let files = try pipeline.run(url.path)
 		print("\(files.count) files:")
