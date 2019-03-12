@@ -9,6 +9,12 @@ struct Pipeline<Input, Output> {
 }
 
 extension Pipeline {
+	func andThen<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
+		return Pipeline<Input, NewOutput>(command.mapOutput(transform))
+	}
+}
+
+extension Pipeline {
 	func run(_ input: Input) throws -> Output {
 		let input = command.serialize(input)
 

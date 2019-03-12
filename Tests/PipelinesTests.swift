@@ -18,7 +18,9 @@ class PipelinesTests: XCTestCase {
 		let path = Bundle(identifier: "com.diephouse.matt.Pipelines")!
 			.bundleURL
 			.path
-		let files = try ls.run(path)
+		let pipeline = Pipeline(ls)
+			.andThen { $0.first! }
+		let files = try pipeline.andThen { [$0] }.run(path)
 		print("\(files.count) files:")
 		for f in files {
 			print("\t • \(f)")
