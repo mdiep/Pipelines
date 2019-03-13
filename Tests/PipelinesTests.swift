@@ -22,7 +22,7 @@ class PipelinesTests: XCTestCase {
 
         print(pipeline)
 		
-		let files = try pipeline.run(url.path)
+		let files = pipeline.run(url.path).first()!.value!
 		print("\(files.count) files:")
 		for f in files {
 			print("\t • \(f)")

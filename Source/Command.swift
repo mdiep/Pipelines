@@ -1,4 +1,6 @@
 import Foundation
+import ReactiveSwift
+import Result
 
 struct Input {
 	var arguments: [String]
@@ -45,27 +47,33 @@ extension Command {
 }
 
 extension Command {
-	func run(_ input: Input) throws -> Output {
-		let input = serialize(input)
+	func run(_ input: Input) -> SignalProducer<Output, NSError> {
+        return SignalProducer { () -> Result<Output, NSError> in
+            let input = self.serialize(input)
 
-		let p = Process()
-		p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-		p.arguments = [executable] + input.arguments
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+            p.arguments = [self.executable] + input.arguments
 
-		let stdout = Pipe()
-		let stderr = Pipe()
-		p.standardOutput = stdout
-		p.standardError = stderr
+            let stdout = Pipe()
+            let stderr = Pipe()
+            p.standardOutput = stdout
+            p.standardError = stderr
 
-		try p.run()
-		p.waitUntilExit()
+            do {
+                try p.run()
+            } catch let error {
+                return .failure(error as NSError)
+            }
+            p.waitUntilExit()
 
-		let output = Pipelines.Output(
-			exitCode: Int(p.terminationStatus),
-			stderr: stderr.fileHandleForReading.readDataToEndOfFile(),
-			stdout: stdout.fileHandleForReading.readDataToEndOfFile()
-		)
-		return deserialize(output)
+            let output = Pipelines.Output(
+                exitCode: Int(p.terminationStatus),
+                stderr: stderr.fileHandleForReading.readDataToEndOfFile(),
+                stdout: stdout.fileHandleForReading.readDataToEndOfFile()
+            )
+            return .success(self.deserialize(output))
+        }
 	}
 }
 

@@ -1,4 +1,5 @@
 import Foundation
+import ReactiveSwift
 
 enum Step {
     case execute(String)
@@ -18,11 +19,11 @@ extension Step: CustomDebugStringConvertible {
 
 struct Pipeline<Input, Output> {
     let steps: [Step]
-	let block: (Input) throws -> Output
+	let block: (Input) -> SignalProducer<Output, NSError>
 
 	internal init(
         steps: [Step],
-        block: @escaping (Input) throws -> Output
+        block: @escaping (Input) -> SignalProducer<Output, NSError>
     ) {
         self.steps = steps
 		self.block = block
@@ -45,7 +46,7 @@ extension Pipeline {
         let steps = self.steps + [.convert(Output.self, NewOutput.self)]
         let block = self.block
         return Pipeline<Input, NewOutput>(steps: steps) { input in
-			return try transform(block(input))
+			return block(input).map(transform)
 		}
 	}
 
@@ -53,13 +54,13 @@ extension Pipeline {
         let steps = self.steps + [.execute(command.executable)]
         let block = self.block
         return Pipeline<Input, NewOutput>(steps: steps) { input in
-			return try command.run(block(input))
+			return block(input).flatMap(.concat, command.run)
 		}
 	}
 }
 
 extension Pipeline {
-	func run(_ input: Input) throws -> Output {
-		return try block(input)
+	func run(_ input: Input) -> SignalProducer<Output, NSError> {
+		return block(input)
 	}
 }
