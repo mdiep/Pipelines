@@ -9,10 +9,10 @@ let ls = Command<String, [String]>(
 )
 
 let pipeline = ls
-    .andThen { url.appendingPathComponent($0[1]).path }
+    .map { url.appendingPathComponent($0[1]).path }
     .andThen(ls)
 
-pipeline.run("path")
+pipeline.run("path").startWithResult { … }
 ```
 
 `Command`s can be built into `Pipeline`s that transform the `Input` to the `Output`.

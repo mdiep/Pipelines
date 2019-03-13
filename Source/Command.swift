@@ -78,8 +78,8 @@ extension Command {
 }
 
 extension Command {
-	func andThen<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
-		return Pipeline(self).andThen(transform)
+	func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
+		return Pipeline(self).map(transform)
 	}
 
 	func andThen<NewOutput>(_ command: Command<Output, NewOutput>) -> Pipeline<Input, NewOutput> {

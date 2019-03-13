@@ -42,7 +42,7 @@ extension Pipeline: CustomDebugStringConvertible {
 }
 
 extension Pipeline {
-	func andThen<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
+	func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
         let steps = self.steps + [.convert(Output.self, NewOutput.self)]
         let block = self.block
         return Pipeline<Input, NewOutput>(steps: steps) { input in
