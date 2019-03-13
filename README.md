@@ -12,6 +12,8 @@ let pipeline = ls
     .map { url.appendingPathComponent($0[1]).path }
     .andThen(ls)
 
+print(pipeline) // prints "ls » (Array<String> → String) » ls"
+
 pipeline.run("path").startWithResult { … }
 ```
 
