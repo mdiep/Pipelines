@@ -1,5 +1,6 @@
-import XCTest
 @testable import Pipelines
+import ReactiveSwift
+import XCTest
 
 class PipelinesTests: XCTestCase {
 	func test() throws {
@@ -21,11 +22,31 @@ class PipelinesTests: XCTestCase {
 			.andThen(ls)
 
         print(pipeline)
-		
-		let files = pipeline.run(url.path).first()!.value!
-		print("\(files.count) files:")
-		for f in files {
-			print("\t • \(f)")
+
+		func printFiles(_ files: [String]) {
+			print("\(files.count) files:")
+			for f in files {
+				print("\t • \(f)")
+			}
 		}
+		
+		let files1 = pipeline.run(url.path).first()!.value!
+		printFiles(files1)
+
+		let files2 = pipeline
+			.run(url.path) { executable, input in
+				print("» \(executable) \(input.arguments)")
+
+				var lines: [String] = []
+				while let line = readLine(), line != "" {
+					lines.append(line)
+				}
+				let stdout = lines.joined(separator: "\n").data(using: .utf8)!
+				let output = Pipelines.Output(exitCode: 0, stderr: Data(), stdout: stdout)
+				return SignalProducer(value: output)
+			}
+			.first()!
+			.value!
+		printFiles(files2)
 	}
 }
