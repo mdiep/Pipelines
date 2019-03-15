@@ -46,13 +46,7 @@ extension Command {
 	}
 }
 
-extension Command {
-    func run(_ input: Input, executor: Executor) -> SignalProducer<Output, NSError> {
-        return executor(executable, serialize(input)).map(deserialize)
-	}
-}
-
-extension Command {
+extension Command: Pipelineable {
 	func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
 		return Pipeline(self).map(transform)
 	}
@@ -64,4 +58,8 @@ extension Command {
     func run(_ input: Input) -> SignalProducer<Output, NSError> {
         return Pipeline(self).run(input)
     }
+
+	func run(_ input: Input, execute: Executor) -> SignalProducer<Output, NSError> {
+		return execute(executable, serialize(input)).map(deserialize)
+	}
 }

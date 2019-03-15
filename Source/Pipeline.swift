@@ -42,7 +42,7 @@ extension Pipeline: CustomDebugStringConvertible {
     }
 }
 
-extension Pipeline {
+extension Pipeline: Pipelineable {
 	func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
         let steps = self.steps + [.convert(Output.self, NewOutput.self)]
         let block = self.block
@@ -56,15 +56,11 @@ extension Pipeline {
         let block = self.block
         return Pipeline<Input, NewOutput>(steps: steps) { input, executor in
             return block(input, executor).flatMap(.concat) { input in
-                return command.run(input, executor: executor)
+                return command.run(input, execute: executor)
             }
 		}
 	}
-}
 
-typealias Executor = (String, Pipelines.Input) -> SignalProducer<Pipelines.Output, NSError>
-
-extension Pipeline {
 	func run(_ input: Input) -> SignalProducer<Output, NSError> {
         return run(input) { executable, input in
             return SignalProducer { () -> Result<Pipelines.Output, NSError> in
