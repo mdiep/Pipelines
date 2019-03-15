@@ -22,7 +22,6 @@ pipeline.run("path").startWithResult { … }
 Notably, this is not done with a `(Output) -> Command<Output, NewOutput>` function. This means that the effects are _static_, so they're open to static analysis. In the above example, you could example the pipeline to test/show that it only calls `ls` and not `rm`.
 
 ## Todo
-- [ ] Add the ability to interpret commands differently
 - [ ] Add branching (based on selective applicative functors)
 - [ ] Make more of `Command` static with `KeyPath`s
 - [ ] Parallel commands

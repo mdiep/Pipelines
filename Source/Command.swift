@@ -47,33 +47,8 @@ extension Command {
 }
 
 extension Command {
-	func run(_ input: Input) -> SignalProducer<Output, NSError> {
-        return SignalProducer { () -> Result<Output, NSError> in
-            let input = self.serialize(input)
-
-            let p = Process()
-            p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-            p.arguments = [self.executable] + input.arguments
-
-            let stdout = Pipe()
-            let stderr = Pipe()
-            p.standardOutput = stdout
-            p.standardError = stderr
-
-            do {
-                try p.run()
-            } catch let error {
-                return .failure(error as NSError)
-            }
-            p.waitUntilExit()
-
-            let output = Pipelines.Output(
-                exitCode: Int(p.terminationStatus),
-                stderr: stderr.fileHandleForReading.readDataToEndOfFile(),
-                stdout: stdout.fileHandleForReading.readDataToEndOfFile()
-            )
-            return .success(self.deserialize(output))
-        }
+    func run(_ input: Input, executor: Executor) -> SignalProducer<Output, NSError> {
+        return executor(executable, serialize(input)).map(deserialize)
 	}
 }
 
@@ -85,4 +60,8 @@ extension Command {
 	func andThen<NewOutput>(_ command: Command<Output, NewOutput>) -> Pipeline<Input, NewOutput> {
 		return Pipeline(self).andThen(command)
 	}
+
+    func run(_ input: Input) -> SignalProducer<Output, NSError> {
+        return Pipeline(self).run(input)
+    }
 }

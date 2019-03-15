@@ -1,5 +1,6 @@
 import Foundation
 import ReactiveSwift
+import Result
 
 enum Step {
     case execute(String)
@@ -19,11 +20,11 @@ extension Step: CustomDebugStringConvertible {
 
 struct Pipeline<Input, Output> {
     let steps: [Step]
-	let block: (Input) -> SignalProducer<Output, NSError>
+	let block: (Input, @escaping Executor) -> SignalProducer<Output, NSError>
 
 	internal init(
         steps: [Step],
-        block: @escaping (Input) -> SignalProducer<Output, NSError>
+        block: @escaping (Input, @escaping Executor) -> SignalProducer<Output, NSError>
     ) {
         self.steps = steps
 		self.block = block
@@ -45,22 +46,58 @@ extension Pipeline {
 	func map<NewOutput>(_ transform: @escaping (Output) -> NewOutput) -> Pipeline<Input, NewOutput> {
         let steps = self.steps + [.convert(Output.self, NewOutput.self)]
         let block = self.block
-        return Pipeline<Input, NewOutput>(steps: steps) { input in
-			return block(input).map(transform)
+        return Pipeline<Input, NewOutput>(steps: steps) { input, executor in
+			return block(input, executor).map(transform)
 		}
 	}
 
 	func andThen<NewOutput>(_ command: Command<Output, NewOutput>) -> Pipeline<Input, NewOutput> {
         let steps = self.steps + [.execute(command.executable)]
         let block = self.block
-        return Pipeline<Input, NewOutput>(steps: steps) { input in
-			return block(input).flatMap(.concat, command.run)
+        return Pipeline<Input, NewOutput>(steps: steps) { input, executor in
+            return block(input, executor).flatMap(.concat) { input in
+                return command.run(input, executor: executor)
+            }
 		}
 	}
 }
 
+typealias Executor = (String, Pipelines.Input) -> SignalProducer<Pipelines.Output, NSError>
+
 extension Pipeline {
 	func run(_ input: Input) -> SignalProducer<Output, NSError> {
-		return block(input)
+        return run(input) { executable, input in
+            return SignalProducer { () -> Result<Pipelines.Output, NSError> in
+                let p = Process()
+                p.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+                p.arguments = [executable] + input.arguments
+
+                let stdout = Pipe()
+                let stderr = Pipe()
+                p.standardOutput = stdout
+                p.standardError = stderr
+
+                do {
+                    try p.run()
+                } catch let error {
+                    return .failure(error as NSError)
+                }
+                p.waitUntilExit()
+
+                let output = Pipelines.Output(
+                    exitCode: Int(p.terminationStatus),
+                    stderr: stderr.fileHandleForReading.readDataToEndOfFile(),
+                    stdout: stdout.fileHandleForReading.readDataToEndOfFile()
+                )
+                return .success(output)
+            }
+        }
 	}
+
+    func run(
+        _ input: Input,
+        execute: @escaping Executor
+    ) -> SignalProducer<Output, NSError> {
+        return block(input, execute)
+    }
 }
