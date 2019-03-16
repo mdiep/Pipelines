@@ -22,7 +22,7 @@ class PipelinesTests: XCTestCase {
 				if let second = files.dropFirst().first {
 					return .left(url.appendingPathComponent(second).path)
 				} else {
-					return .right([]);
+					return .right([])
 				}
 			}
 			.select(Pipeline(ls))
