@@ -55,6 +55,10 @@ extension Command: Pipelineable {
 		return Pipeline(self).andThen(command)
 	}
 
+	func select<A, B>(_ pipeline: Pipeline<A, B>) -> Pipeline<Input, B> where Output == Either<A, B> {
+		return Pipeline(self).select(pipeline)
+	}
+
     func run(_ input: Input) -> SignalProducer<Output, NSError> {
         return Pipeline(self).run(input)
     }

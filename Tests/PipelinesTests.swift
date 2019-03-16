@@ -18,8 +18,14 @@ class PipelinesTests: XCTestCase {
 
 		let url = Bundle(identifier: "com.diephouse.matt.Pipelines")!.bundleURL
 		let pipeline = ls
-			.map { url.appendingPathComponent($0[1]).path }
-			.andThen(ls)
+			.map { files -> Either<String, [String]> in
+				if let second = files.dropFirst().first {
+					return .left(url.appendingPathComponent(second).path)
+				} else {
+					return .right([]);
+				}
+			}
+			.select(Pipeline(ls))
 
         print(pipeline)
 

@@ -3,17 +3,20 @@ import ReactiveSwift
 import Result
 
 enum Step {
+	case convert(Any.Type, Any.Type)
     case execute(String)
-    case convert(Any.Type, Any.Type)
+	case select([Step])
 }
 
 extension Step: CustomDebugStringConvertible {
     var debugDescription: String {
         switch self {
+		case let .convert(a, b):
+			return "(\(a) → \(b))"
         case let .execute(name):
             return name
-        case let .convert(a, b):
-            return "(\(a) → \(b))"
+		case let .select(steps):
+			return "[" + steps.map { "\($0)" }.joined(separator: " » ") + "]"
         }
     }
 }
@@ -58,6 +61,22 @@ extension Pipeline: Pipelineable {
             return block(input, executor).flatMap(.concat) { input in
                 return command.run(input, execute: executor)
             }
+		}
+	}
+
+	func select<A, B>(_ pipeline: Pipeline<A, B>) -> Pipeline<Input, B> where Output == Either<A, B> {
+		let steps = self.steps + [.select(pipeline.steps)]
+		let block = self.block
+		return Pipeline<Input, B>(steps: steps) { input, executor in
+			return block(input, executor)
+				.flatMap(.concat) { (input: Either<A, B>) -> SignalProducer<B, NSError> in
+					switch input {
+					case let .left(input):
+						return pipeline.block(input, executor)
+					case let .right(input):
+						return SignalProducer(value: input)
+					}
+				}
 		}
 	}
 
