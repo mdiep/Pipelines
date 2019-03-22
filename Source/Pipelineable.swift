@@ -20,7 +20,7 @@ protocol Pipelineable {
 
 	func run(_ input: Input) -> SignalProducer<Output, NSError>
 
-	func run(_ input: Input, execute: @escaping Executor) -> SignalProducer<Output, NSError> 
+	func run(_ input: Input, execute: @escaping Executor) -> SignalProducer<Output, NSError>
 }
 
 extension Pipelineable {

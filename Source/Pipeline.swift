@@ -5,7 +5,14 @@ import Result
 enum Step {
 	case convert(Any.Type, Any.Type)
     case execute(String)
+	case parallel([[Step]])
 	case select([Step])
+}
+
+extension Array where Element == Step {
+	fileprivate var stepDescription: String {
+		return map { "\($0)" }.joined(separator: " » ")
+	}
 }
 
 extension Step: CustomDebugStringConvertible {
@@ -15,8 +22,10 @@ extension Step: CustomDebugStringConvertible {
 			return "(\(a) → \(b))"
         case let .execute(name):
             return name
+		case let .parallel(steps):
+			return "(" + steps.map { $0.stepDescription }.joined(separator: "; ") + ")"
 		case let .select(steps):
-			return "[" + steps.map { "\($0)" }.joined(separator: " » ") + "]"
+			return "[" + steps.stepDescription + "]"
         }
     }
 }
@@ -41,7 +50,7 @@ struct Pipeline<Input, Output> {
 
 extension Pipeline: CustomDebugStringConvertible {
     var debugDescription: String {
-        return steps.map { "\($0)" }.joined(separator: " » ")
+        return steps.stepDescription
     }
 }
 
@@ -115,4 +124,19 @@ extension Pipeline: Pipelineable {
     ) -> SignalProducer<Output, NSError> {
         return block(input, execute)
     }
+}
+
+extension Pipeline {
+	static func parallel<A, B>(
+		_ a: Pipeline<Input, A>,
+		_ b: Pipeline<Input, B>
+	) -> Pipeline where Output == (A, B) {
+		let steps = [ Step.parallel([a.steps, b.steps])]
+		return Pipeline(steps: steps) { input, executor in
+			return SignalProducer.zip(
+				a.block(input, executor),
+				b.block(input, executor)
+			)
+		}
+	}
 }

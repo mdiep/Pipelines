@@ -17,7 +17,7 @@ class PipelinesTests: XCTestCase {
 		)
 
 		let url = Bundle(identifier: "com.diephouse.matt.Pipelines")!.bundleURL
-		let pipeline = ls
+		let pipeline1 = ls
 			.map { files -> Either<String, [String]> in
 				if let second = files.dropFirst().first {
 					return .left(url.appendingPathComponent(second).path)
@@ -27,6 +27,9 @@ class PipelinesTests: XCTestCase {
 			}
 			.select(Pipeline(ls))
 
+		let pipeline2 = Pipeline(ls)
+
+		let pipeline = Pipeline<String, ([String], [String])>.parallel(pipeline1, pipeline2)
         print(pipeline)
 
 		func printFiles(_ files: [String]) {
@@ -37,7 +40,8 @@ class PipelinesTests: XCTestCase {
 		}
 		
 		let files1 = pipeline.run(url.path).first()!.value!
-		printFiles(files1)
+		printFiles(files1.0)
+		printFiles(files1.1)
 
 		let files2 = pipeline
 			.run(url.path) { executable, input in
@@ -53,6 +57,7 @@ class PipelinesTests: XCTestCase {
 			}
 			.first()!
 			.value!
-		printFiles(files2)
+		printFiles(files2.0)
+		printFiles(files2.1)
 	}
 }

@@ -56,7 +56,6 @@ Notably, this is not done with a `(Output) -> Command<Output, NewOutput>` functi
 
 ## Todo
 - [ ] Make more of `Command` static with `KeyPath`s
-- [ ] Parallel commands
 - [ ] Document
 - [ ] Test
 - [ ] Make API public
